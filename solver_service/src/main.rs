@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
                 Ok(r) => r,
                 Err(_) => {
                     log::error!("Failed to serialize a request");
-                    write_response(SolveResponse::Fault, &mut socket);
+                    write_response(SolveResponse::Fault, &mut socket).await;
                     return;
                 }
             };
@@ -49,6 +49,5 @@ async fn write_response(response: SolveResponse, socket: &mut TcpStream) {
     }
     if let Err(e) = socket.write_all(&resp).await {
         log::error!("Failed to write response: {}", e);
-        return;
     }
 }

@@ -1,4 +1,4 @@
-use sqlx::Row;
+use sqlx::{sqlite::SqlitePoolOptions, Row};
 use std::pin::Pin;
 
 use sqlx::{Result, SqlitePool};
@@ -10,11 +10,9 @@ pub struct ProblemRepository {
 }
 
 impl ProblemRepository {
-    pub async fn default() -> Self {
-        let pool = SqlitePool::connect(todo!("real DB"))
-            .await
-            .expect("failed to establish database");
-        Self { pool }
+    pub async fn new(database_url: &str) -> Result<Self> {
+        let pool = SqlitePool::connect(database_url).await?;
+        Ok(Self { pool })
     }
 }
 
@@ -60,9 +58,25 @@ impl ProblemRow {
 impl Test for ProblemRepository {
     fn test_object() -> Pin<Box<dyn Future<Output = Self> + Send>> {
         Box::pin(async move {
-            let pool = SqlitePool::connect(todo!("test DB"))
+            let pool = SqlitePoolOptions::new()
+                .max_connections(1)
+                .connect("sqlite::memory:")
                 .await
-                .expect("failed to establish database");
+                .expect("failed to create test db");
+
+            sqlx::query(
+                r#"
+                CREATE TABLE problems (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data TEXT NOT NULL,
+                    answer INTEGER NOT NULL
+                )
+                "#,
+            )
+            .execute(&pool)
+            .await
+            .expect("failed to create schema");
+
             Self { pool }
         })
     }

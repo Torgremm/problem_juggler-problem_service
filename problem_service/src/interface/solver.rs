@@ -2,7 +2,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 use contracts::SolveRequest;
 use contracts::SolveResponse;
-use std::net::TcpStream;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpStream;
 
 #[async_trait]
 pub trait SolverClient: Send + Sync {
@@ -10,11 +11,11 @@ pub trait SolverClient: Send + Sync {
 }
 
 pub struct RemoteSolverClient {
-    addr: String,
+    addr: &'static str,
 }
 
 impl RemoteSolverClient {
-    pub fn new(addr: String) -> Self {
+    pub fn new(addr: &'static str) -> Self {
         Self { addr }
     }
 }
@@ -22,11 +23,12 @@ impl RemoteSolverClient {
 impl Default for RemoteSolverClient {
     fn default() -> Self {
         Self {
-            addr: "127.0.0.1:4000".to_string(),
+            addr: "127.0.0.1:4000",
         }
     }
 }
 
+#[async_trait]
 impl SolverClient for RemoteSolverClient {
     async fn solve(&self, request: SolveRequest) -> Result<SolveResponse> {
         let mut stream = TcpStream::connect(&self.addr).await?;

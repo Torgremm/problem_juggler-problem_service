@@ -6,9 +6,9 @@ pub fn solve_size_of_island(data: Vec<Vec<bool>>) -> SolveResponse {
         .map(|row| row.iter().filter(|&&v| v).count())
         .sum::<usize>() as i64;
     if total == 0 {
-        return SolveResponse::BadData;
+        return SolveResponse::BadData("No island found".to_string());
     }
-    SolveResponse::SizeOfIsland(total)
+    SolveResponse::Solved(total)
 }
 
 #[cfg(test)]
@@ -16,7 +16,7 @@ mod tests {
     use super::*;
 
     fn should_equal(value: SolveResponse, shouldequal: i64) {
-        if let SolveResponse::SizeOfIsland(v) = value {
+        if let SolveResponse::Solved(v) = value {
             assert_eq!(v, shouldequal)
         } else {
             panic!("Expected SizeOfIsland response")
@@ -27,7 +27,7 @@ mod tests {
     fn t1() {
         let data = vec![vec![false; 20]; 20];
         let answer = solve_size_of_island(data);
-        assert!(answer == SolveResponse::BadData);
+        assert!(answer == SolveResponse::BadData("No island found".to_string()));
     }
     #[test]
     fn t2() {

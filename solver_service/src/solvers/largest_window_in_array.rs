@@ -9,7 +9,7 @@ pub fn solve_largest_window_in_array(data: Vec<i64>) -> SolveResponse {
         best = best.max(current);
     }
 
-    SolveResponse::LargestWindowInArray(best)
+    SolveResponse::Solved(best)
 }
 
 #[cfg(test)]
@@ -17,10 +17,10 @@ mod tests {
     use super::*;
 
     fn should_equal(value: SolveResponse, shouldequal: i64) {
-        if let SolveResponse::LargestWindowInArray(v) = value {
+        if let SolveResponse::Solved(v) = value {
             assert_eq!(v, shouldequal)
         } else {
-            panic!("Expected LargestWindowInArray response")
+            panic!("Expected response")
         }
     }
 

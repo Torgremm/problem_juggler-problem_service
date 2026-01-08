@@ -2,11 +2,9 @@ use wincode::{SchemaRead, SchemaWrite};
 
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum SolveResponse {
-    LargestWindowInArray(i64),
-    TestProblem(String),
-    SizeOfIsland(i64),
+    Solved(i64),
     Fault,
-    BadData,
+    BadData(String),
 }
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum SolveRequest {

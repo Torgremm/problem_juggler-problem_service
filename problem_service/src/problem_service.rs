@@ -17,7 +17,9 @@ pub struct ProblemService {
 impl ProblemService {
     pub async fn default() -> Self {
         Self {
-            repo: ProblemRepository::default().await,
+            repo: ProblemRepository::new("sqlite:./data/problems.db")
+                .await
+                .expect("failed to create database"),
             solve_client: RemoteSolverClient::new("127.0.0.1:4000"),
         }
     }
@@ -26,17 +28,25 @@ impl ProblemService {
 impl ProblemService {
     pub async fn get<P: Problem>(&self) -> Result<ProblemRow> {
         let data = P::create();
-        let data_string = format!("{:?}", data);
+        let data_string = format!("{:?}", data)
+            .strip_prefix('"')
+            .unwrap()
+            .strip_suffix('"')
+            .unwrap()
+            .to_string();
+        println!("data = {:?}", data);
+        println!("data_string = {:?}", data_string);
+        println!("len = {}", data_string.len());
         let request = P::into_request(data);
         let answer = self.solve_client.solve(request).await?;
-        match answer {
-            SolveResponse::BadData => return Err(anyhow::Error),
-            SolveResponse::Fault => return Err(anyhow::Error),
-            _ => {}
-        }
+        let a = match answer {
+            SolveResponse::Solved(v) => v,
+            SolveResponse::BadData(message) => return Err(anyhow::anyhow!(message)),
+            SolveResponse::Fault => return Err(anyhow::anyhow!("Failed to get problem")),
+        };
 
-        let id = self.repo.insert((data_string.clone(), answer)).await?;
-        Ok(ProblemRow::new(id.try_into()?, answer, data_string))
+        let id = self.repo.insert((data_string.clone(), a)).await?;
+        Ok(ProblemRow::new(id.try_into()?, a, data_string))
     }
     pub async fn validate(&self, id: i64, answer: i64) -> Result<bool> {
         let problem = self.query(id).await?;
@@ -97,8 +107,8 @@ mod tests {
         type Data = String;
         fn create() -> String {
             let mut rng = rand::rng();
-            let answer = rng.random_range(0..10);
-            answer.to_string()
+            let count = rng.random_range(5..10);
+            std::iter::repeat_n('0', count).collect()
         }
         fn into_request(data: String) -> SolveRequest {
             SolveRequest::TestProblem { data }
@@ -114,18 +124,13 @@ mod tests {
         assert_eq!(problem2.id, 2);
         assert_eq!(problem3.id, 3);
 
-        let validation1 = service
-            .validate(problem1.id, problem1.data.parse().unwrap())
-            .await
-            .unwrap();
-        let validation2 = service
-            .validate(problem1.id, problem2.data.parse().unwrap())
-            .await
-            .unwrap();
-        let validation3 = service
-            .validate(problem3.id, problem3.data.parse().unwrap())
-            .await
-            .unwrap();
+        let p1ans = problem1.data.len();
+        let p2ans = problem2.data.len();
+        let p3ans = problem3.data.len();
+
+        let validation1 = service.validate(problem1.id, p1ans as i64).await.unwrap();
+        let validation2 = service.validate(problem2.id, p2ans as i64).await.unwrap();
+        let validation3 = service.validate(problem3.id, p3ans as i64).await.unwrap();
 
         assert!(validation1);
         assert!(validation2);

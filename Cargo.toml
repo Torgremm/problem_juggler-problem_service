@@ -4,3 +4,4 @@ members = [
  "solver_service",
  "problem_service",
 ]
+resolver = "3"

@@ -3,7 +3,7 @@ use contracts::{SolveRequest, SolveResponse};
 
 pub struct SolverService;
 impl SolverService {
-    pub fn solve(req: SolveRequest) -> SolveResponse {
+    pub async fn solve(req: SolveRequest) -> SolveResponse {
         log::debug!("received request for: {:?}", req);
         match_and_solve(req)
     }
