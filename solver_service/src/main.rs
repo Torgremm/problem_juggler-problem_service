@@ -1,21 +1,32 @@
 #![allow(dead_code)]
+use std::sync::Arc;
+
+use crate::solver_service::SolverService;
 use anyhow::Result;
 use contracts::{SolveRequest, SolveResponse};
 use env_logger::Env;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-
-use crate::solver_service::SolverService;
+use tokio::sync::Semaphore;
 mod solver_service;
 mod solvers;
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let listener: TcpListener = TcpListener::bind("127.0.0.1:4000").await?;
+    let sem = Arc::new(Semaphore::new(100));
     log::info!("SolverService listening on 127.0.0.1:4000");
     loop {
+        let permit = match sem.clone().acquire_owned().await {
+            Ok(p) => p,
+            Err(e) => {
+                log::error!("Failed to aquire permit from semaphore: {}", e);
+                continue;
+            }
+        };
         let (mut socket, _) = listener.accept().await?;
         tokio::spawn(async move {
+            let _permit = permit;
             let mut len_buf = [0u8; 8];
             if socket.read_exact(&mut len_buf).await.is_err() {
                 return;

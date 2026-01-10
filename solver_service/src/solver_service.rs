@@ -5,7 +5,9 @@ pub struct SolverService;
 impl SolverService {
     pub async fn solve(req: SolveRequest) -> SolveResponse {
         log::debug!("received request for: {:?}", req);
-        match_and_solve(req)
+        tokio::task::spawn_blocking(move || match_and_solve(req))
+            .await
+            .unwrap_or(SolveResponse::Fault)
     }
 }
 

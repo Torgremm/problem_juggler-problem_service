@@ -5,11 +5,7 @@ use rand::Rng;
 use crate::problems::problem_kind::Problem;
 use contracts::SolveRequest;
 
-pub struct SizeOfIsland {
-    id: Option<i64>,
-    data: String,
-    answer: i64,
-}
+pub struct SizeOfIsland;
 
 const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, 1), (0, -1)];
 impl Problem for SizeOfIsland {
@@ -55,5 +51,24 @@ impl Problem for SizeOfIsland {
 
     fn into_request(data: Self::Data) -> SolveRequest {
         SolveRequest::SizeOfIsland { data }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ensure_size_and_range_is_valid() {
+        let data = SizeOfIsland::create();
+        let mut total = 0;
+        for row in data {
+            for cell in row {
+                if cell {
+                    total += 1;
+                }
+            }
+        }
+        assert!((20..=80).contains(&total))
     }
 }

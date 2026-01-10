@@ -3,11 +3,7 @@ use rand::Rng;
 use crate::problems::problem_kind::Problem;
 use contracts::SolveRequest;
 
-pub struct LargestWindow {
-    id: Option<i64>,
-    data: String,
-    answer: i64,
-}
+pub struct LargestWindow;
 impl Problem for LargestWindow {
     type Data = Vec<i64>;
     fn create() -> Vec<i64> {
@@ -22,5 +18,18 @@ impl Problem for LargestWindow {
 
     fn into_request(data: Self::Data) -> SolveRequest {
         SolveRequest::LargestWindowInArray { data }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ensure_size_and_range_is_valid() {
+        let data = LargestWindow::create();
+        assert!(*data.iter().max().unwrap() < 21);
+        assert!(*data.iter().min().unwrap() > -21);
+        assert!(data.len() == 20);
     }
 }
