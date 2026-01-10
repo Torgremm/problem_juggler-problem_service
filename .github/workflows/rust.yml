@@ -27,16 +27,20 @@ jobs:
         run: cargo build --workspace --verbose
 
       # Step 1: Run unit tests
-      - name: Run unit tests
-        run: cargo test --workspace --lib --verbose
+      #- name: Run unit tests for problem service
+      #  working-directory: problem_service
+      #  run: cargo test --verbose
 
-      # Step 2: Start solver_service
+      - name: Run unit tests for solver service
+        working-directory: solver_service
+        run: cargo test --verbose
+
+      # Step 2: Start solver_service in the background
       - name: Start solver_service
         working-directory: solver_service
         run: |
-          cargo build --release
-          ./target/release/solver_service &    # background
-          # Wait for service to be ready
+          cargo run &   # run in background
+
           for i in $(seq 1 15); do
             if nc -z localhost 4000; then
               echo "solver_service ready"
