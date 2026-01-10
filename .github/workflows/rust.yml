@@ -1,0 +1,51 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Rust
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # Build
+      - name: Build workspace
+        run: cargo build --workspace --verbose
+
+      # Step 1: Run unit tests
+      - name: Run unit tests
+        run: cargo test --workspace --lib --verbose
+
+      # Step 2: Start solver_service
+      - name: Start solver_service
+        working-directory: solver_service
+        run: |
+          cargo build --release
+          ./target/release/solver_service &    # background
+          # Wait for service to be ready
+          for i in $(seq 1 15); do
+            if nc -z localhost 4000; then
+              echo "solver_service ready"
+              break
+            fi
+            echo "Waiting for solver_service..."
+            sleep 1
+          done
+
+      # Step 3: Run interface tests
+      - name: Run interface tests
+        run: cargo test -p problem_service --features test-utils --tests --verbose
