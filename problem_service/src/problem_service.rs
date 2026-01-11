@@ -2,9 +2,12 @@ use crate::interface::solver::RemoteSolverClient;
 use crate::interface::solver::SolverClient;
 use crate::problem_handler::ProblemRepository;
 use crate::problem_handler::ProblemRow;
+use crate::problems::largest_window::LargestWindow;
 use crate::problems::problem_kind::DBColumn;
 use crate::problems::problem_kind::Problem;
+use crate::problems::size_of_island::SizeOfIsland;
 use anyhow::Result;
+use contracts::ProblemRequest;
 use contracts::SolveResponse;
 
 pub struct ProblemService {
@@ -25,6 +28,17 @@ impl ProblemService {
                 .await
                 .expect("failed to create database"),
             solve_client: RemoteSolverClient::new("127.0.0.1:4000"),
+        }
+    }
+}
+
+impl ProblemService {
+    pub async fn get_dispatch(&self, req: ProblemRequest) -> Result<ProblemRow> {
+        match req {
+            ProblemRequest::LargestWindowInArray => Ok(self.get::<LargestWindow>().await?),
+            ProblemRequest::UnimplementedProblem => todo!(),
+            ProblemRequest::TestProblem => todo!(),
+            ProblemRequest::SizeOfIsland => Ok(self.get::<SizeOfIsland>().await?),
         }
     }
 }

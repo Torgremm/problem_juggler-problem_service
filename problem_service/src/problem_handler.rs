@@ -1,3 +1,4 @@
+use contracts::{ProblemResponse, UserProblem};
 use sqlx::{sqlite::SqlitePoolOptions, Row};
 
 use sqlx::{Result, SqlitePool};
@@ -50,6 +51,13 @@ impl ProblemRow {
     }
     pub fn validate(&self, answer: i64) -> bool {
         answer == self.answer
+    }
+    pub fn to_response(&self) -> ProblemResponse {
+        let p = UserProblem {
+            id: self.id,
+            data: self.data.clone(),
+        };
+        ProblemResponse::Ok(p)
     }
 }
 

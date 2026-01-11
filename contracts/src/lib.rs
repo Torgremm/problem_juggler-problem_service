@@ -13,3 +13,32 @@ pub enum SolveRequest {
     SizeOfIsland { data: Vec<Vec<bool>> },
     UnimplementedProblem { data: String },
 }
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub enum ProblemRequest {
+    LargestWindowInArray,
+    TestProblem,
+    SizeOfIsland,
+    UnimplementedProblem,
+}
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub struct UserProblem {
+    pub id: i64,
+    pub data: String,
+}
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub enum ProblemResponse {
+    Ok(UserProblem),
+    Fault,
+}
+
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub struct ValidationRequest {
+    pub problem_id: i64,
+    pub answer: i64,
+}
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub enum ValidationResponse {
+    Valid,
+    Lower,
+    Higher,
+}
