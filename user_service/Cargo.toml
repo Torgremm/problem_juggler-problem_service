@@ -1,0 +1,16 @@
+[package]
+name = "user_service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+async-trait = "0.1.89"
+rand = "0.9.2"
+serde = "1.0.228"
+sqlx = { version = "0.8.6", features = ["sqlite", "macros", "runtime-tokio-native-tls"]}
+tokio = {version = "1.49.0", features = ["full"] }
+contracts = { path = "../contracts" }
+env_logger = "0.11.8"
+log = "0.4.29"
+wincode = { version = "0.2.5", features = ["std"] }

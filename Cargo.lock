@@ -1908,6 +1908,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "user_service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "contracts",
+ "env_logger",
+ "log",
+ "rand 0.9.2",
+ "serde",
+ "sqlx",
+ "tokio",
+ "wincode",
+]
+
+[[package]]
 name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

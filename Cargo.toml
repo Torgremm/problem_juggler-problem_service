@@ -2,6 +2,6 @@
 members = [
  "contracts",
  "solver_service",
- "problem_service",
+ "problem_service", "user_service",
 ]
 resolver = "3"

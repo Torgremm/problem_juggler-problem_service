@@ -1,4 +1,4 @@
-use contracts::SolveRequest;
+use contracts::{SolveRequest, ValidationResponse};
 use problem_service::problems::problem_kind::Problem;
 
 use problem_service::test_utils::test_service;
@@ -36,7 +36,7 @@ async fn insert_shouldwork() {
     let validation2 = service.validate(problem2.id, p2ans as i64).await.unwrap();
     let validation3 = service.validate(problem3.id, p3ans as i64).await.unwrap();
 
-    assert!(validation1);
-    assert!(validation2);
-    assert!(validation3);
+    assert!(validation1 == ValidationResponse::Valid);
+    assert!(validation2 == ValidationResponse::Valid);
+    assert!(validation3 == ValidationResponse::Valid);
 }

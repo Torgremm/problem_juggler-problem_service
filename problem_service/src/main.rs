@@ -1,8 +1,10 @@
 #![allow(dead_code)]
+use contracts::ValidationRequest;
+use contracts::ValidationResponse;
 use std::sync::Arc;
 
 use anyhow::Result;
-use contracts::{ProblemRequest, ProblemResponse};
+use contracts::{ProblemRequest, ProblemResponse, ProblemServiceRequest};
 use env_logger::Env;
 use problem_service::ProblemService;
 use std::sync::OnceLock;
@@ -43,30 +45,15 @@ async fn main() -> Result<()> {
             if socket.read_exact(&mut buf).await.is_err() {
                 return;
             }
-            let req: ProblemRequest = match wincode::deserialize(&buf) {
-                Ok(r) => r,
+            let _ = match wincode::deserialize(&buf) {
+                Ok(r) => match_request(r, &mut socket),
                 Err(_) => {
                     log::error!("Failed to serialize a request");
                     write_response(ProblemResponse::Fault, &mut socket).await;
                     return;
                 }
-            };
-
-            let resp = match SERVICE
-                .get()
-                .expect("Catastrophic failure, service gone")
-                .get_dispatch(req)
-                .await
-            {
-                Ok(r) => r.to_response(),
-                Err(_) => {
-                    log::error!("Failed to generate problem");
-                    write_response(ProblemResponse::Fault, &mut socket).await;
-                    return;
-                }
-            };
-
-            write_response(resp, &mut socket).await;
+            }
+            .await;
         });
     }
 }
@@ -80,4 +67,55 @@ async fn write_response(response: ProblemResponse, socket: &mut TcpStream) {
     if let Err(e) = socket.write_all(&resp).await {
         log::error!("Failed to write response: {}", e);
     }
+}
+async fn write_validation(response: ValidationResponse, socket: &mut TcpStream) {
+    let resp = wincode::serialize(&response).unwrap();
+    if let Err(e) = socket.write_all(&(resp.len() as u64).to_be_bytes()).await {
+        log::error!("Failed to write response length: {}", e);
+        return;
+    }
+    if let Err(e) = socket.write_all(&resp).await {
+        log::error!("Failed to write response: {}", e);
+    }
+}
+
+async fn match_request(req: ProblemServiceRequest, socket: &mut TcpStream) {
+    match req {
+        ProblemServiceRequest::Problem(r) => handle_problem_request(r, socket).await,
+        ProblemServiceRequest::Validation(r) => handle_validation_request(r, socket).await,
+    }
+}
+
+async fn handle_problem_request(req: ProblemRequest, socket: &mut TcpStream) {
+    let resp = match SERVICE
+        .get()
+        .expect("Catastrophic failure, service gone")
+        .get_dispatch(req)
+        .await
+    {
+        Ok(r) => r.to_response(),
+        Err(_) => {
+            log::error!("Failed to generate problem");
+            write_response(ProblemResponse::Fault, socket).await;
+            return;
+        }
+    };
+
+    write_response(resp, socket).await;
+}
+async fn handle_validation_request(req: ValidationRequest, socket: &mut TcpStream) {
+    let resp = match SERVICE
+        .get()
+        .expect("Catastrophic failure, service gone")
+        .validate(req.problem_id, req.answer)
+        .await
+    {
+        Ok(r) => r,
+        Err(_) => {
+            log::error!("Failed to generate problem");
+            write_response(ProblemResponse::Fault, socket).await;
+            return;
+        }
+    };
+    write_validation(resp, socket).await;
 }

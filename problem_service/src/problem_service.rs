@@ -9,6 +9,7 @@ use crate::problems::size_of_island::SizeOfIsland;
 use anyhow::Result;
 use contracts::ProblemRequest;
 use contracts::SolveResponse;
+use contracts::ValidationResponse;
 
 pub struct ProblemService {
     repo: ProblemRepository,
@@ -58,7 +59,7 @@ impl ProblemService {
         let id = self.repo.insert((&data_string, a)).await?;
         Ok(ProblemRow::new(id.try_into()?, a, data_string))
     }
-    pub async fn validate(&self, id: i64, answer: i64) -> Result<bool> {
+    pub async fn validate(&self, id: i64, answer: i64) -> Result<ValidationResponse> {
         let problem = self.query(id).await?;
         Ok(problem.validate(answer))
     }
