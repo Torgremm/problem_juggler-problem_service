@@ -15,8 +15,6 @@ static SERVICE: OnceLock<UserService> = OnceLock::new();
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-    todo!();
-    return Ok(());
     let service = UserService::default().await;
     let _ = SERVICE.set(service);
 
@@ -45,7 +43,7 @@ async fn main() -> Result<()> {
             if socket.read_exact(&mut buf).await.is_err() {
                 return;
             }
-            let req: UserResponse = match wincode::deserialize(&buf) {
+            let req: UserRequest = match wincode::deserialize(&buf) {
                 Ok(r) => r,
                 Err(_) => {
                     log::error!("Failed to serialize a request");
@@ -53,6 +51,11 @@ async fn main() -> Result<()> {
                     return;
                 }
             };
+            let resp = match req {
+                UserRequest::Login(u) => SERVICE.get().unwrap().login(u).await,
+                UserRequest::Create(u) => SERVICE.get().unwrap().create_user(u).await,
+            };
+            write_response(resp, &mut socket).await;
         });
     }
 }

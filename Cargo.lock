@@ -1920,6 +1920,7 @@ dependencies = [
  "serde",
  "sqlx",
  "tokio",
+ "user_service",
  "wincode",
 ]
 

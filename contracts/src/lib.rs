@@ -49,14 +49,14 @@ pub enum ProblemResponse {
 
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub struct User {
-    name: String,
-    token: String,
+    pub name: String,
+    pub token: String,
 }
 
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub struct UserCredentials {
-    name: String,
-    hash: String,
+    pub name: String,
+    pub hash: String,
 }
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum UserRequest {

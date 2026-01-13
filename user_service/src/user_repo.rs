@@ -1,4 +1,4 @@
-use contracts::{ProblemResponse, UserProblem};
+use contracts::{ProblemResponse, User, UserCredentials, UserProblem};
 use sqlx::{sqlite::SqlitePoolOptions, Row};
 
 use sqlx::{Result, SqlitePool};
@@ -15,22 +15,39 @@ impl UserRepository {
 }
 
 impl UserRepository {
-    pub async fn get(&self, id: i64) -> Result<String> {
-        let row = sqlx::query("SELECT id, name, credentials FROM users WHERE id = ?")
-            .bind(id)
-            .fetch_one(&self.pool)
+    pub async fn create_user(&self, user: &UserCredentials) -> Result<(), UserRepoError> {
+        let row = sqlx::query("SELECT id, name FROM users WHERE name = ?")
+            .bind(&user.name)
+            .fetch_optional(&self.pool)
             .await?;
-        Ok(todo!())
+
+        if row.is_some() {
+            return Err(UserRepoError::DuplicateName);
+        }
+
+        self.insert(user).await?;
+
+        Ok(())
+    }
+    pub async fn get(&self, user: &UserCredentials) -> Result<String> {
+        let _row =
+            sqlx::query("SELECT id, name, credentials FROM users WHERE (name,credentials) = (?,?)")
+                .bind(user.name.clone())
+                .bind(user.hash.clone())
+                .fetch_one(&self.pool)
+                .await?;
+
+        Ok("aaaaaaaa".to_string())
     }
 
-    pub async fn insert(&self, (data, answer): (&String, i64)) -> anyhow::Result<usize> {
-        let result = sqlx::query("INSERT INTO problems (data, answer) VALUES (?,?)")
-            .bind(data)
-            .bind(answer)
+    async fn insert(&self, user: &UserCredentials) -> Result<(), UserRepoError> {
+        let _result = sqlx::query("INSERT INTO users (name, hash) VALUES (?,?)")
+            .bind(user.name.clone())
+            .bind(user.hash.clone())
             .execute(&self.pool)
             .await?;
 
-        Ok(result.last_insert_rowid().try_into()?)
+        Ok(())
     }
 }
 
@@ -51,6 +68,35 @@ impl UserRow {
     }
 }
 
+#[derive(Debug)]
+pub enum UserRepoError {
+    DuplicateName,
+    Sqlx(sqlx::Error),
+}
+impl std::fmt::Display for UserRepoError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserRepoError::DuplicateName => write!(f, "user with that name already exists"),
+            UserRepoError::Sqlx(e) => write!(f, "database error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for UserRepoError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            UserRepoError::Sqlx(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+impl From<sqlx::Error> for UserRepoError {
+    fn from(err: sqlx::Error) -> Self {
+        UserRepoError::Sqlx(err)
+    }
+}
+
 #[cfg(feature = "test-utils")]
 impl UserRepository {
     pub async fn test_object() -> UserRepository {
@@ -62,10 +108,10 @@ impl UserRepository {
 
         sqlx::query(
             r#"
-                CREATE TABLE problems (
+                CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data TEXT NOT NULL,
-                    answer INTEGER NOT NULL
+                    name TEXT NOT NULL,
+                    credentials TEXT NOT NULL
                 )
                 "#,
         )

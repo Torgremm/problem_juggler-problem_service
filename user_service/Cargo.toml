@@ -3,6 +3,12 @@ name = "user_service"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+test-utils = []
+
+[dev-dependencies]
+user_service = { path = ".", features = ["test-utils"]}
+
 [dependencies]
 anyhow = "1.0.100"
 async-trait = "0.1.89"
