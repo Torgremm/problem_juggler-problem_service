@@ -67,5 +67,5 @@ pub enum UserRequest {
 pub enum UserResponse {
     Valid(User),
     Invalid,
-    Fault,
+    Fault(String),
 }

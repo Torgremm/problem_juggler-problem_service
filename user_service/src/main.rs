@@ -45,9 +45,9 @@ async fn main() -> Result<()> {
             }
             let req: UserRequest = match wincode::deserialize(&buf) {
                 Ok(r) => r,
-                Err(_) => {
+                Err(e) => {
                     log::error!("Failed to serialize a request");
-                    write_response(UserResponse::Fault, &mut socket).await;
+                    write_response(UserResponse::Fault(e.to_string()), &mut socket).await;
                     return;
                 }
             };

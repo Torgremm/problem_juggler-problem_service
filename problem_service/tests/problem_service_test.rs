@@ -1,7 +1,6 @@
 use contracts::{SolveRequest, ValidationResponse};
 use problem_service::problems::problem_kind::Problem;
 
-use problem_service::test_utils::test_service;
 use rand::Rng;
 mod common;
 

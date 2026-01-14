@@ -41,7 +41,7 @@ impl UserRepository {
     }
 
     async fn insert(&self, user: &UserCredentials) -> Result<(), UserRepoError> {
-        let _result = sqlx::query("INSERT INTO users (name, hash) VALUES (?,?)")
+        let _result = sqlx::query("INSERT INTO users (name, credentials) VALUES (?,?)")
             .bind(user.name.clone())
             .bind(user.hash.clone())
             .execute(&self.pool)

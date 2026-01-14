@@ -1,10 +1,7 @@
 use crate::user_repo::UserRepoError;
 use crate::user_repo::UserRepository;
-use crate::user_repo::UserRow;
-use anyhow::Result;
 use contracts::User;
 use contracts::UserCredentials;
-use contracts::UserRequest;
 use contracts::UserResponse;
 
 pub struct UserService {
@@ -38,7 +35,7 @@ impl UserService {
                 })
             }
             Err(UserRepoError::DuplicateName) => UserResponse::Invalid,
-            _ => UserResponse::Fault,
+            Err(e) => UserResponse::Fault(e.to_string()),
         }
     }
 
@@ -48,7 +45,63 @@ impl UserService {
                 name: user.name,
                 token,
             }),
-            Err(e) => UserResponse::Fault,
+            Err(e) => UserResponse::Fault(e.to_string()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    fn get_user(name: String) -> UserCredentials {
+        UserCredentials {
+            name: name.clone(),
+            hash: name,
+        }
+    }
+    #[tokio::test]
+    async fn login_to_five_users() {
+        let repo = UserRepository::test_object().await;
+        let service = UserService::new(repo);
+        let users = (0..5).map(|n| get_user(format!("user{:?}", n)));
+
+        for user in users.clone() {
+            if let UserResponse::Valid(u) = service.create_user(user.clone()).await {
+                assert_eq!(u.name, user.name);
+            } else {
+                unreachable!()
+            }
+        }
+
+        for user in users {
+            if let UserResponse::Valid(u) = service.login(user.clone()).await {
+                assert_eq!(u.name, user.name);
+            } else {
+                unreachable!()
+            }
+        }
+    }
+    #[tokio::test]
+    async fn create_five_users() {
+        let repo = UserRepository::test_object().await;
+        let service = UserService::new(repo);
+        let users = (0..5).map(|n| get_user(format!("user{:?}", n)));
+
+        for user in users.clone() {
+            let result = service.create_user(user.clone()).await;
+            match result {
+                UserResponse::Valid(u) => assert_eq!(u.name, user.name),
+                UserResponse::Invalid => println!("Invalid {:?}", result),
+                UserResponse::Fault(e) => println!("{e}"),
+            }
+        }
+        for user in users {
+            assert_eq!(
+                service.create_user(user.clone()).await,
+                UserResponse::Invalid
+            );
         }
     }
 }
