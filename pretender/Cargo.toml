@@ -13,3 +13,4 @@ contracts = { path = "../contracts" }
 env_logger = "0.11.8"
 log = "0.4.29"
 wincode = { version = "0.2.5", features = ["std"] }
+thiserror = "2.0.17"
