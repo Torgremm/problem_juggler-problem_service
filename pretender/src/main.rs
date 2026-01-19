@@ -12,8 +12,8 @@ use crate::stress_runner::{ServiceError, StressRunner};
 #[tokio::main]
 async fn main() -> Result<(), ServiceError> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-    let current = std::env::current_dir().expect("Failed to get current directory");
-    let parent = current.parent().expect("Failed to find patent");
+    let cur = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let parent = cur.parent().unwrap(); //
     let user_service_dir = parent.join("user_service");
     let solver_service_dir = parent.join("solver_service");
     let problem_service_dir = parent.join("problem_service");
