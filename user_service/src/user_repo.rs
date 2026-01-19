@@ -9,6 +9,7 @@ pub struct UserRepository {
 
 impl UserRepository {
     pub async fn new(database_url: &str) -> Result<Self> {
+        #[cfg(feature = "test-utils")]
         if database_url == "sqlite::memory:" {
             return Ok(Self::test_object().await);
         }

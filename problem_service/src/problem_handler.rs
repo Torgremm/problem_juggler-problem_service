@@ -10,6 +10,7 @@ pub struct ProblemRepository {
 
 impl ProblemRepository {
     pub async fn new(database_url: &str) -> Result<Self> {
+        #[cfg(feature = "test-utils")]
         if database_url == "sqlite::memory:" {
             return Ok(Self::test_object().await);
         }
@@ -72,6 +73,7 @@ impl ProblemRow {
     }
 }
 
+#[cfg(feature = "test-utils")]
 impl ProblemRepository {
     pub async fn test_object() -> ProblemRepository {
         let pool = SqlitePoolOptions::new()

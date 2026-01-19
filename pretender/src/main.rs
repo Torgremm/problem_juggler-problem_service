@@ -34,6 +34,8 @@ async fn main() -> Result<(), ServiceError> {
 fn start_service(dir: PathBuf) -> Result<Child, std::io::Error> {
     Command::new("cargo")
         .arg("run")
+        .arg("--features")
+        .arg("test-utils")
         .current_dir(&dir)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

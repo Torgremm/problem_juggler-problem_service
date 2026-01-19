@@ -57,3 +57,14 @@ jobs:
       # Step 3: Run interface tests
       - name: Run interface tests
         run: cargo test -p problem_service --features test-utils --tests --verbose
+
+      - name: Stop solver_service
+        if: always()
+        run: |
+          if [ -f solver_service/solver.pid ]; then
+            kill -- -$(cat solver_service/solver.pid) || true
+          fi
+
+      # Step 4: Stress test
+      - name: Run stress test
+        run: cargo run -p pretender
