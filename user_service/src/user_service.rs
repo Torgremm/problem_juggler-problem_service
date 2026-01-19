@@ -18,7 +18,7 @@ impl UserService {
 impl UserService {
     pub async fn default() -> Self {
         Self {
-            repo: UserRepository::new("sqlite:./data/users.db")
+            repo: UserRepository::new("sqlite::memory:")
                 .await
                 .expect("failed to create database"),
         }

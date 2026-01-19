@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(warnings)]
 use std::sync::Arc;
 
 use crate::solver_service::SolverService;

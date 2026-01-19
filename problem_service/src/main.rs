@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(warnings)]
 use contracts::ValidationRequest;
 use contracts::ValidationResponse;
 use std::sync::Arc;
@@ -47,8 +47,8 @@ async fn main() -> Result<()> {
             }
             let _ = match wincode::deserialize(&buf) {
                 Ok(r) => match_request(r, &mut socket),
-                Err(_) => {
-                    log::error!("Failed to serialize a request");
+                Err(e) => {
+                    log::error!("Failed to serialize a request: {}", e);
                     write_response(ProblemResponse::Fault, &mut socket).await;
                     return;
                 }
@@ -94,8 +94,8 @@ async fn handle_problem_request(req: ProblemRequest, socket: &mut TcpStream) {
         .await
     {
         Ok(r) => r.to_response(),
-        Err(_) => {
-            log::error!("Failed to generate problem");
+        Err(e) => {
+            log::error!("Failed to generate problem: {}", e);
             write_response(ProblemResponse::Fault, socket).await;
             return;
         }
@@ -111,8 +111,8 @@ async fn handle_validation_request(req: ValidationRequest, socket: &mut TcpStrea
         .await
     {
         Ok(r) => r,
-        Err(_) => {
-            log::error!("Failed to generate problem");
+        Err(e) => {
+            log::error!("Failed to validate problem: {}", e);
             write_response(ProblemResponse::Fault, socket).await;
             return;
         }

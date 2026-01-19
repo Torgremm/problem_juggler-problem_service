@@ -26,7 +26,7 @@ impl ProblemService {
 impl ProblemService {
     pub async fn default() -> Self {
         Self {
-            repo: ProblemRepository::new("sqlite:./data/problems.db")
+            repo: ProblemRepository::new("sqlite::memory:")
                 .await
                 .expect("failed to create database"),
             solve_client: RemoteSolverClient::new("127.0.0.1:4000"),
@@ -55,7 +55,9 @@ impl ProblemService {
         let a = match answer {
             SolveResponse::Solved(v) => v,
             SolveResponse::BadData(message) => return Err(anyhow::anyhow!(message)),
-            SolveResponse::Fault => return Err(anyhow::anyhow!("Failed to get problem")),
+            SolveResponse::Fault => {
+                return Err(anyhow::anyhow!("Solver was unable to solve the problem"))
+            }
         };
 
         let id = self.repo.insert((&data_string, a)).await?;

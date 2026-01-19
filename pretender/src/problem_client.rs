@@ -1,5 +1,5 @@
-use contracts::ProblemRequest;
 use contracts::ProblemResponse;
+use contracts::ProblemServiceRequest;
 
 use crate::client::Client;
 
@@ -22,7 +22,7 @@ impl Default for RemoteProblemClient {
 }
 
 impl Client for RemoteProblemClient {
-    type Req = ProblemRequest;
+    type Req = ProblemServiceRequest;
     type Recv = ProblemResponse;
     fn get_addr(&self) -> &str {
         self.addr

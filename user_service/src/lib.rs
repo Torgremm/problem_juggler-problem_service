@@ -1,3 +1,4 @@
+#![allow(warnings)]
 pub mod tokens;
 pub mod user_repo;
 pub mod user_service;

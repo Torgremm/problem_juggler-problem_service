@@ -1,3 +1,4 @@
+#![allow(warnings)]
 pub mod interface;
 pub mod problem_handler;
 pub mod problem_service;

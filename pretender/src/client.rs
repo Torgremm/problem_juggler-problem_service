@@ -1,11 +1,12 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use std::fmt::Debug;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 #[async_trait]
 pub trait Client: Send + Sync {
-    type Req: Send + wincode::SchemaWrite<Src = Self::Req>;
-    type Recv: Send + for<'de> wincode::SchemaRead<'de, Dst = Self::Recv>;
+    type Req: Debug + Send + wincode::SchemaWrite<Src = Self::Req>;
+    type Recv: Debug + Send + for<'de> wincode::SchemaRead<'de, Dst = Self::Recv>;
 
     async fn req(&self, request: Self::Req) -> Result<Self::Recv> {
         let mut stream = TcpStream::connect(&self.get_addr()).await?;
@@ -25,6 +26,8 @@ pub trait Client: Send + Sync {
         stream.read_exact(&mut resp_buf).await?;
 
         let resp: Self::Recv = wincode::deserialize(&resp_buf)?;
+
+        log::info!("Received valid response: {:?}", resp);
 
         Ok(resp)
     }
