@@ -24,7 +24,7 @@ jobs:
 
       # Build
       - name: Build workspace
-        run: cargo build --workspace --verbose
+        run: cargo build --workspace --features test-utils --verbose
 
       # Step 1: Run unit tests
       - name: Run unit tests for problem service
@@ -41,11 +41,10 @@ jobs:
 
       # Step 2: Start solver_service in the background
       - name: Start solver_service
-        working-directory: solver_service
         run: |
-          setsid cargo run &
+          setsid target/debug/solver_service &
           echo $! > solver.pid
-
+      
           for i in $(seq 1 15); do
             if nc -z localhost 4000; then
               echo "solver_service ready"
@@ -62,8 +61,8 @@ jobs:
       - name: Stop solver_service
         if: always()
         run: |
-          if [ -f solver_service/solver.pid ]; then
-            kill -- -$(cat solver_service/solver.pid) || true
+          if [ -f solver.pid ]; then
+            kill -- -$(cat solver.pid) || true
           fi
           sleep 1
 

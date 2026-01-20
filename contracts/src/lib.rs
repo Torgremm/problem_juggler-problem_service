@@ -33,6 +33,11 @@ pub enum ProblemServiceRequest {
     Validation(ValidationRequest),
 }
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+pub enum ProblemServiceResponse {
+    Problem(ProblemResponse),
+    Validation(ValidationResponse),
+}
+#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum ValidationResponse {
     Valid,
     Lower,
