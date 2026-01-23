@@ -4,9 +4,10 @@ pub mod user;
 
 use anyhow::Result;
 use async_trait::async_trait;
+use futures::future::BoxFuture;
+use std::any::type_name;
 use std::convert::Infallible;
 use std::fmt::Debug;
-use std::future::Future;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -47,12 +48,12 @@ pub trait Client: Send + Sync {
 pub trait Listener: Send + Sync {
     type Recv: Debug + Send + for<'de> wincode::SchemaRead<'de, Dst = Self::Recv>;
 
-    async fn listen<F, Fut>(&self, on_read: Arc<F>) -> Result<Infallible, anyhow::Error>
+    async fn listen<F>(&self, on_read: Arc<F>) -> Result<Infallible, anyhow::Error>
     where
-        F: Fn(Self::Recv, &mut TcpStream) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = ()> + Send,
+        F: Fn(Self::Recv, TcpStream) -> BoxFuture<'static, ()> + Send + Sync + 'static,
     {
         let listener: TcpListener = TcpListener::bind(self.get_addr()).await?;
+        log::info!("{} listening on {}", type_name::<Self>(), self.get_addr());
         let sem = Arc::new(Semaphore::new(100));
         const MAX_FRAME: u64 = 4 * 1024 * 1024;
 
@@ -90,7 +91,7 @@ pub trait Listener: Send + Sync {
                         return;
                     }
                 };
-                (on_read)(r, &mut socket).await;
+                (on_read)(r, socket).await;
             });
         }
     }

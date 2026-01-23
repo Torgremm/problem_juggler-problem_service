@@ -2,6 +2,8 @@
 use contracts::problem::ProblemServiceResponse;
 use contracts::problem::ValidationRequest;
 use contracts::problem::ValidationResponse;
+use contracts::Listener;
+use futures::future::BoxFuture;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -32,50 +34,14 @@ async fn main() -> Result<()> {
     let service = ProblemService::default().await;
     let _ = SERVICE.set(service);
 
-    let listener: TcpListener = TcpListener::bind("127.0.0.1:4001").await?;
-    let sem = Arc::new(Semaphore::new(100));
-    log::info!("ProblemService listening on 127.0.0.1:4001");
+    let listener = ProblemListener {
+        addr: "127.0.0.1:4001",
+    };
 
-    const MAX_FRAME: u64 = 4 * 1024 * 1024;
-
-    loop {
-        let permit = match sem.clone().acquire_owned().await {
-            Ok(p) => p,
-            Err(e) => {
-                log::error!("Failed to aquire permit from semaphore: {}", e);
-                continue;
-            }
-        };
-        let (mut socket, _) = listener.accept().await?;
-        tokio::spawn(async move {
-            let _permit = permit;
-            let mut len_buf = [0u8; 8];
-            if socket.read_exact(&mut len_buf).await.is_err() {
-                return;
-            }
-
-            let len = u64::from_be_bytes(len_buf);
-            if len > MAX_FRAME {
-                log::error!("Frame too large: {}", len);
-                return;
-            }
-            let mut buf = vec![0u8; len as usize];
-            if socket.read_exact(&mut buf).await.is_err() {
-                return;
-            }
-            let _ = match wincode::deserialize(&buf) {
-                Ok(r) => match_request(r, &mut socket),
-                Err(e) => {
-                    log::error!("Failed to serialize a request: {}", e);
-                    write_problem(ProblemResponse::Fault(e.to_string()), &mut socket).await;
-                    return;
-                }
-            }
-            .await;
-        });
-    }
+    listener.listen(Arc::new(match_request)).await?;
+    Ok(())
 }
-async fn write_response(response: ProblemServiceResponse, socket: &mut TcpStream) -> Result<()> {
+async fn write_response(response: ProblemServiceResponse, mut socket: TcpStream) -> Result<()> {
     let resp = wincode::serialize(&response)?;
     if let Err(e) = socket.write_all(&(resp.len() as u64).to_be_bytes()).await {
         log::error!("Failed to write response length: {}", e);
@@ -87,21 +53,23 @@ async fn write_response(response: ProblemServiceResponse, socket: &mut TcpStream
     }
     Ok(())
 }
-async fn write_problem(response: ProblemResponse, socket: &mut TcpStream) {
+async fn write_problem(response: ProblemResponse, mut socket: TcpStream) {
     write_response(ProblemServiceResponse::Problem(response), socket).await;
 }
-async fn write_validation(response: ValidationResponse, socket: &mut TcpStream) {
+async fn write_validation(response: ValidationResponse, mut socket: TcpStream) {
     write_response(ProblemServiceResponse::Validation(response), socket).await;
 }
 
-async fn match_request(req: ProblemServiceRequest, socket: &mut TcpStream) {
-    match req {
-        ProblemServiceRequest::Problem(r) => handle_problem_request(r, socket).await,
-        ProblemServiceRequest::Validation(r) => handle_validation_request(r, socket).await,
-    }
+fn match_request(req: ProblemServiceRequest, mut socket: TcpStream) -> BoxFuture<'static, ()> {
+    Box::pin(async move {
+        match req {
+            ProblemServiceRequest::Problem(r) => handle_problem_request(r, socket).await,
+            ProblemServiceRequest::Validation(r) => handle_validation_request(r, socket).await,
+        }
+    })
 }
 
-async fn handle_problem_request(req: ProblemRequest, socket: &mut TcpStream) {
+async fn handle_problem_request(req: ProblemRequest, mut socket: TcpStream) {
     let resp = match SERVICE
         .get()
         .expect("Catastrophic failure, service gone")
@@ -118,7 +86,7 @@ async fn handle_problem_request(req: ProblemRequest, socket: &mut TcpStream) {
 
     write_problem(resp, socket).await;
 }
-async fn handle_validation_request(req: ValidationRequest, socket: &mut TcpStream) {
+async fn handle_validation_request(req: ValidationRequest, mut socket: TcpStream) {
     let resp = match SERVICE
         .get()
         .expect("Catastrophic failure, service gone")
