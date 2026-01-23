@@ -1,5 +1,5 @@
-use contracts::SolveRequest;
-use contracts::SolveResponse;
+use contracts::solver::SolveRequest;
+use contracts::solver::SolveResponse;
 
 use crate::client::Client;
 

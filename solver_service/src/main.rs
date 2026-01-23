@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::solver_service::SolverService;
 use anyhow::Result;
-use contracts::{SolveRequest, SolveResponse};
+use contracts::solver::{SolveRequest, SolveResponse};
 use env_logger::Env;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};

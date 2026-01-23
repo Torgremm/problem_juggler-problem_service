@@ -1,4 +1,4 @@
-use contracts::UserCredentials;
+use contracts::user::UserCredentials;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use sqlx::{Result, SqlitePool};

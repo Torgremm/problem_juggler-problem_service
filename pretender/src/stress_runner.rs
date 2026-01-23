@@ -1,8 +1,9 @@
 #![allow(warnings)]
 use anyhow::Error as AnyError;
 use contracts::{
-    ProblemRequest, ProblemResponse, ProblemServiceRequest, ProblemServiceResponse, SolveRequest,
-    SolveResponse, UserCredentials, UserRequest, ValidationRequest, ValidationResponse,
+    problem::ProblemRequest, problem::ProblemResponse, problem::ProblemServiceRequest,
+    problem::ProblemServiceResponse, problem::ValidationRequest, problem::ValidationResponse,
+    solver::SolveRequest, solver::SolveResponse, user::UserCredentials, user::UserRequest,
 };
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::process::Child;

@@ -1,5 +1,4 @@
 use crate::interface::solver::RemoteSolverClient;
-use crate::interface::solver::SolverClient;
 use crate::problem_handler::ProblemRepository;
 use crate::problem_handler::ProblemRow;
 use crate::problems::count_islands::CountIslands;
@@ -8,9 +7,10 @@ use crate::problems::problem_kind::DBColumn;
 use crate::problems::problem_kind::Problem;
 use crate::problems::size_of_island::SizeOfIsland;
 use anyhow::Result;
-use contracts::ProblemRequest;
-use contracts::SolveResponse;
-use contracts::ValidationResponse;
+use contracts::problem::ProblemRequest;
+use contracts::problem::ValidationResponse;
+use contracts::solver::SolveResponse;
+use contracts::Client;
 
 pub struct ProblemService {
     repo: ProblemRepository,
@@ -51,7 +51,7 @@ impl ProblemService {
         let data = P::create();
         let data_string = data.to_db_entry();
         let request = P::into_request(data);
-        let answer = self.solve_client.solve(request).await?;
+        let answer = self.solve_client.req(request).await?;
         let a = match answer {
             SolveResponse::Solved(v) => v,
             SolveResponse::BadData(message) => return Err(anyhow::anyhow!(message)),

@@ -1,11 +1,11 @@
 #![allow(warnings)]
-use contracts::ProblemServiceResponse;
-use contracts::ValidationRequest;
-use contracts::ValidationResponse;
+use contracts::problem::ProblemServiceResponse;
+use contracts::problem::ValidationRequest;
+use contracts::problem::ValidationResponse;
 use std::sync::Arc;
 
 use anyhow::Result;
-use contracts::{ProblemRequest, ProblemResponse, ProblemServiceRequest};
+use contracts::problem::{ProblemRequest, ProblemResponse, ProblemServiceRequest};
 use env_logger::Env;
 use problem_service::ProblemService;
 use std::sync::OnceLock;
@@ -14,6 +14,17 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::Semaphore;
 
 static SERVICE: OnceLock<ProblemService> = OnceLock::new();
+
+struct ProblemListener {
+    addr: &'static str,
+}
+
+impl contracts::Listener for ProblemListener {
+    type Recv = ProblemServiceRequest;
+    fn get_addr(&self) -> &str {
+        self.addr
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,7 +56,7 @@ async fn main() -> Result<()> {
 
             let len = u64::from_be_bytes(len_buf);
             if len > MAX_FRAME {
-                log::error!("Fram too large: {}", len);
+                log::error!("Frame too large: {}", len);
                 return;
             }
             let mut buf = vec![0u8; len as usize];

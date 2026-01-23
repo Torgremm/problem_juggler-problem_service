@@ -1,5 +1,5 @@
 use crate::solvers::*;
-use contracts::{SolveRequest, SolveResponse};
+use contracts::solver::{SolveRequest, SolveResponse};
 
 pub struct SolverService;
 impl SolverService {

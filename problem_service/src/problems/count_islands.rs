@@ -1,4 +1,4 @@
-use contracts::SolveRequest;
+use contracts::solver::SolveRequest;
 use rand::Rng;
 use std::collections::{HashSet, VecDeque};
 
@@ -16,7 +16,7 @@ impl Problem for CountIslands {
         create_islands(count, size)
     }
 
-    fn into_request(data: Self::Data) -> contracts::SolveRequest {
+    fn into_request(data: Self::Data) -> SolveRequest {
         SolveRequest::CountIslands { data }
     }
 }

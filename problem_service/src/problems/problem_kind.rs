@@ -1,4 +1,4 @@
-use contracts::SolveRequest;
+use contracts::solver::SolveRequest;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, Copy)]

@@ -1,5 +1,5 @@
-use contracts::UserRequest;
-use contracts::UserResponse;
+use contracts::user::UserRequest;
+use contracts::user::UserResponse;
 
 use crate::client::Client;
 

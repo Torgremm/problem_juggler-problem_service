@@ -1,4 +1,4 @@
-use contracts::SolveResponse;
+use contracts::solver::SolveResponse;
 
 pub fn solve_size_of_island(data: Vec<Vec<bool>>) -> SolveResponse {
     let total = data

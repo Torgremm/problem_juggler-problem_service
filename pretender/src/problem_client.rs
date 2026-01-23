@@ -1,5 +1,5 @@
-use contracts::ProblemServiceRequest;
-use contracts::ProblemServiceResponse;
+use contracts::problem::ProblemServiceRequest;
+use contracts::problem::ProblemServiceResponse;
 
 use crate::client::Client;
 

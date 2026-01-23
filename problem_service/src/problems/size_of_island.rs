@@ -3,7 +3,7 @@ use std::collections::{HashSet, VecDeque};
 use rand::Rng;
 
 use crate::problems::problem_kind::Problem;
-use contracts::SolveRequest;
+use contracts::solver::SolveRequest;
 
 pub struct SizeOfIsland;
 

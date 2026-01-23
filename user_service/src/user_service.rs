@@ -1,9 +1,9 @@
 use crate::tokens::token_factory::Token;
 use crate::user_repo::UserRepoError;
 use crate::user_repo::UserRepository;
-use contracts::User;
-use contracts::UserCredentials;
-use contracts::UserResponse;
+use contracts::user::User;
+use contracts::user::UserCredentials;
+use contracts::user::UserResponse;
 
 pub struct UserService {
     repo: UserRepository,

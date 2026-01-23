@@ -1,4 +1,4 @@
-use contracts::SolveResponse;
+use contracts::solver::SolveResponse;
 pub fn solve_largest_window_in_array(data: Vec<i64>) -> SolveResponse {
     log::debug!("Solving largest window in array with: {:?}", data);
     let mut best: i64 = data[0];

@@ -1,5 +1,5 @@
-use contracts::ValidationResponse;
-use contracts::{ProblemResponse, UserProblem};
+use contracts::problem::ValidationResponse;
+use contracts::problem::{ProblemResponse, UserProblem};
 use sqlx::{sqlite::SqlitePoolOptions, Row};
 
 use sqlx::{Result, SqlitePool};

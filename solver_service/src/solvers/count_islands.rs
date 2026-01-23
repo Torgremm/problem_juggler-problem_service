@@ -1,4 +1,4 @@
-use contracts::SolveResponse;
+use contracts::solver::SolveResponse;
 use std::collections::VecDeque;
 
 type Grid = Vec<Vec<bool>>;
