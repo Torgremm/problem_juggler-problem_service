@@ -1,4 +1,5 @@
 #![allow(warnings)]
+mod parser;
 mod problem_client;
 mod solver_client;
 mod stress_runner;
@@ -6,7 +7,7 @@ mod user_client;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use tokio::net::TcpStream;
-use tokio::time::{sleep, Duration, Instant};
+use tokio::time::{Duration, Instant, sleep};
 
 use env_logger::Env;
 

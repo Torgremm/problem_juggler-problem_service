@@ -12,6 +12,7 @@ use std::thread;
 use std::time::Duration;
 use thiserror::Error;
 
+use crate::parser::validate;
 use crate::problem_client::RemoteProblemClient;
 use crate::solver_client::RemoteSolverClient;
 use crate::user_client::RemoteUserClient;
@@ -57,38 +58,25 @@ impl StressRunner {
             {
                 ProblemServiceResponse::Problem(ProblemResponse::Ok(p)) => p,
                 ProblemServiceResponse::Problem(ProblemResponse::Fault(e)) => {
-                    return Err(ServiceError::fault("problem", e))
+                    return Err(ServiceError::fault("problem", e));
                 }
                 _ => {
                     return Err(ServiceError::fault(
                         "problem",
                         "Problem service returned the wrong response".into(),
-                    ))
+                    ));
                 }
             };
-            let solver_req = {
-                let data = resp
-                    .data
-                    .trim_start_matches('[')
-                    .trim_end_matches(']')
-                    .split(',')
-                    .map(|v| {
-                        v.trim()
-                            .parse::<i64>()
-                            .map_err(|e| ServiceError::fault("solver", e.to_string()))
-                    })
-                    .collect::<Result<Vec<_>, _>>()?;
-
-                SolveRequest::LargestWindowInArray { data }
-            };
-            let solution = match solver_client.req(solver_req).await {
-                Ok(SolveResponse::Solved(val)) => val,
-                _ => return Err(ServiceError::fault("solver", "".into())),
-            };
+            let sol = validate(
+                resp.data,
+                ProblemRequest::LargestWindowInArray,
+                &solver_client,
+            )
+            .await?;
 
             let validation_req = ProblemServiceRequest::Validation(ValidationRequest {
                 problem_id: resp.id,
-                answer: solution,
+                answer: sol,
             });
 
             let validation = match problem_client.req(validation_req).await {
