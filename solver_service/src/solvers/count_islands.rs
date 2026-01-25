@@ -8,7 +8,7 @@ pub fn solve_count_islands(data: Grid) -> SolveResponse {
         return SolveResponse::BadData("Received empty grid".to_string());
     }
     let col_count = data[0].len();
-    if row_count == 0 {
+    if col_count == 0 {
         return SolveResponse::BadData("Received empty grid".to_string());
     }
 

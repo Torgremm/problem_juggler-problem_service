@@ -7,10 +7,10 @@ use crate::problems::problem_kind::DBColumn;
 use crate::problems::problem_kind::Problem;
 use crate::problems::size_of_island::SizeOfIsland;
 use anyhow::Result;
+use contracts::Client;
 use contracts::problem::ProblemRequest;
 use contracts::problem::ValidationResponse;
 use contracts::solver::SolveResponse;
-use contracts::Client;
 
 pub struct ProblemService {
     repo: ProblemRepository,
@@ -29,7 +29,7 @@ impl ProblemService {
             repo: ProblemRepository::new("sqlite::memory:")
                 .await
                 .expect("failed to create database"),
-            solve_client: RemoteSolverClient::new("127.0.0.1:4000"),
+            solve_client: RemoteSolverClient::default(),
         }
     }
 }
@@ -56,7 +56,7 @@ impl ProblemService {
             SolveResponse::Solved(v) => v,
             SolveResponse::BadData(message) => return Err(anyhow::anyhow!(message)),
             SolveResponse::Fault => {
-                return Err(anyhow::anyhow!("Solver was unable to solve the problem"))
+                return Err(anyhow::anyhow!("Solver was unable to solve the problem"));
             }
         };
 

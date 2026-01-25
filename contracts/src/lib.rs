@@ -39,7 +39,7 @@ pub trait Client: Send + Sync {
         }
     }
 
-    fn get_addr(&self) -> &str;
+    fn get_addr(&self) -> String;
 }
 
 pub trait Listener: Send + Sync {
@@ -96,5 +96,5 @@ pub trait Listener: Send + Sync {
         }
     }
 
-    fn get_addr(&self) -> &str;
+    fn get_addr(&self) -> String;
 }

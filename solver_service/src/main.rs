@@ -13,13 +13,13 @@ mod solver_service;
 mod solvers;
 
 struct SolverListener {
-    addr: &'static str,
+    addr: String,
 }
 
 impl contracts::Listener for SolverListener {
     type Recv = SolveRequest;
-    fn get_addr(&self) -> &str {
-        self.addr
+    fn get_addr(&self) -> String {
+        self.addr.clone()
     }
 }
 
@@ -27,7 +27,7 @@ impl contracts::Listener for SolverListener {
 async fn main() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let listener = SolverListener {
-        addr: "127.0.0.1:4000",
+        addr: contracts::solver::url(),
     };
     listener.listen(handle_request).await?;
     Ok(())

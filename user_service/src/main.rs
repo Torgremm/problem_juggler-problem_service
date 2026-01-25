@@ -13,13 +13,13 @@ use user_service::user_service::UserService;
 
 static SERVICE: OnceLock<UserService> = OnceLock::new();
 struct UserListener {
-    addr: &'static str,
+    addr: String,
 }
 
 impl contracts::Listener for UserListener {
     type Recv = UserRequest;
-    fn get_addr(&self) -> &str {
-        self.addr
+    fn get_addr(&self) -> String {
+        self.addr.clone()
     }
 }
 
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     let service = UserService::default().await;
     let _ = SERVICE.set(service);
     let listener = UserListener {
-        addr: "127.0.0.1:4002",
+        addr: contracts::user::url(),
     };
     listener.listen(handle_request).await?;
     Ok(())

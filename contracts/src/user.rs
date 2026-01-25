@@ -1,5 +1,14 @@
 use wincode::{SchemaRead, SchemaWrite};
 
+fn host() -> String {
+    std::env::var("USER_HOST").unwrap_or_else(|_| "127.0.0.1".to_string())
+}
+fn port() -> String {
+    std::env::var("USER_PORT").unwrap_or_else(|_| "4002".to_string())
+}
+pub fn url() -> String {
+    format!("{}:{}", host(), port())
+}
 #[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub struct User {
     pub name: String,

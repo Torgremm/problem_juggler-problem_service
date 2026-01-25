@@ -1,8 +1,8 @@
 #![allow(warnings)]
+use contracts::Listener;
 use contracts::problem::ProblemServiceResponse;
 use contracts::problem::ValidationRequest;
 use contracts::problem::ValidationResponse;
-use contracts::Listener;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -17,13 +17,13 @@ use tokio::sync::Semaphore;
 static SERVICE: OnceLock<ProblemService> = OnceLock::new();
 
 struct ProblemListener {
-    addr: &'static str,
+    addr: String,
 }
 
 impl contracts::Listener for ProblemListener {
     type Recv = ProblemServiceRequest;
-    fn get_addr(&self) -> &str {
-        self.addr
+    fn get_addr(&self) -> String {
+        self.addr.clone()
     }
 }
 
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     let _ = SERVICE.set(service);
 
     let listener = ProblemListener {
-        addr: "127.0.0.1:4001",
+        addr: contracts::problem::url(),
     };
 
     listener.listen(match_request).await?;

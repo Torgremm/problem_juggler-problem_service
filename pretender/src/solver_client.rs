@@ -1,21 +1,14 @@
+use contracts::Client;
 use contracts::solver::SolveRequest;
 use contracts::solver::SolveResponse;
-use contracts::Client;
 
 pub struct RemoteSolverClient {
-    addr: &'static str,
+    addr: String,
 }
-
-impl RemoteSolverClient {
-    pub fn new(addr: &'static str) -> Self {
-        Self { addr }
-    }
-}
-
 impl Default for RemoteSolverClient {
     fn default() -> Self {
         Self {
-            addr: "127.0.0.1:4000",
+            addr: contracts::solver::url(),
         }
     }
 }
@@ -23,7 +16,7 @@ impl Default for RemoteSolverClient {
 impl contracts::Client for RemoteSolverClient {
     type Req = SolveRequest;
     type Recv = SolveResponse;
-    fn get_addr(&self) -> &str {
-        self.addr
+    fn get_addr(&self) -> String {
+        self.addr.clone()
     }
 }

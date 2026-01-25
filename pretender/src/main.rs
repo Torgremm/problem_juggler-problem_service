@@ -22,17 +22,21 @@ async fn main() -> Result<(), ServiceError> {
     let solver_service_dir = target.join(bin_name("solver_service"));
     let problem_service_dir = target.join(bin_name("problem_service"));
 
-    let user_service =
-        start_and_wait_service(&user_service_dir, "127.0.0.1:4002", Duration::from_secs(5)).await?;
+    let user_service = start_and_wait_service(
+        &user_service_dir,
+        &contracts::user::url(),
+        Duration::from_secs(5),
+    )
+    .await?;
     let solver_service = start_and_wait_service(
         &solver_service_dir,
-        "127.0.0.1:4000",
+        &contracts::solver::url(),
         Duration::from_secs(5),
     )
     .await?;
     let problem_service = start_and_wait_service(
         &problem_service_dir,
-        "127.0.0.1:4001",
+        &contracts::solver::url(),
         Duration::from_secs(5),
     )
     .await?;

@@ -1,21 +1,15 @@
+use contracts::Client;
 use contracts::problem::ProblemServiceRequest;
 use contracts::problem::ProblemServiceResponse;
-use contracts::Client;
 
 pub struct RemoteProblemClient {
-    addr: &'static str,
-}
-
-impl RemoteProblemClient {
-    pub fn new(addr: &'static str) -> Self {
-        Self { addr }
-    }
+    addr: String,
 }
 
 impl Default for RemoteProblemClient {
     fn default() -> Self {
         Self {
-            addr: "127.0.0.1:4001",
+            addr: contracts::problem::url(),
         }
     }
 }
@@ -23,7 +17,7 @@ impl Default for RemoteProblemClient {
 impl contracts::Client for RemoteProblemClient {
     type Req = ProblemServiceRequest;
     type Recv = ProblemServiceResponse;
-    fn get_addr(&self) -> &str {
-        self.addr
+    fn get_addr(&self) -> String {
+        self.addr.clone()
     }
 }
