@@ -2,8 +2,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use contracts::user::{UserRequest, UserResponse};
 use contracts::Listener;
+use contracts::user::{UserRequest, UserResponse};
 use env_logger::Env;
 use std::sync::OnceLock;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};

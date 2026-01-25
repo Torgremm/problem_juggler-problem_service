@@ -1,6 +1,6 @@
 use wincode::{SchemaRead, SchemaWrite};
 
-#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+#[derive(Clone, Copy, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum ProblemRequest {
     LargestWindowInArray,
     CountIslands,
@@ -8,12 +8,12 @@ pub enum ProblemRequest {
     SizeOfIsland,
     UnimplementedProblem,
 }
-#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+#[derive(Clone, Copy, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub struct ValidationRequest {
     pub problem_id: i64,
     pub answer: i64,
 }
-#[derive(Clone, Debug, PartialEq, SchemaWrite, SchemaRead)]
+#[derive(Clone, Copy, Debug, PartialEq, SchemaWrite, SchemaRead)]
 pub enum ProblemServiceRequest {
     Problem(ProblemRequest),
     Validation(ValidationRequest),

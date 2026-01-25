@@ -39,6 +39,10 @@ jobs:
         working-directory: user_service
         run: cargo test --verbose
 
+      - name: Run unit tests for pretender
+        working-directory: pretender
+        run: cargo test --verbose
+
 
       # Step 2: Stress test
       - name: Run stress test

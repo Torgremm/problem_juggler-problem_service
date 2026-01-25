@@ -33,7 +33,13 @@ macro_rules! impl_db_column {
     };
 }
 
-impl_db_column!(i64, usize, bool, char, String, &str);
+impl_db_column!(i64, usize, char, String, &str);
+
+impl DBColumn for bool {
+    fn to_db_entry(&self) -> String {
+        if *self { "1".into() } else { "0".into() }
+    }
+}
 
 impl<T> DBColumn for Vec<T>
 where

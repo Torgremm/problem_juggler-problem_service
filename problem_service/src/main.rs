@@ -3,7 +3,6 @@ use contracts::problem::ProblemServiceResponse;
 use contracts::problem::ValidationRequest;
 use contracts::problem::ValidationResponse;
 use contracts::Listener;
-use futures::future::BoxFuture;
 use std::sync::Arc;
 
 use anyhow::Result;

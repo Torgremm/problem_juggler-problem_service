@@ -46,7 +46,7 @@ impl Walk for Map {
     fn check(&self, p: Point, dir: (isize, isize)) -> Option<Point> {
         let rc = p.0 as isize + dir.0;
         let cc = p.1 as isize + dir.1;
-        if rc < 0 || rc > self.row_c || cc < 0 || cc > self.col_c {
+        if rc < 0 || rc >= self.row_c || cc < 0 || cc >= self.col_c {
             return None;
         }
         let rc = rc as usize;

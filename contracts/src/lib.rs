@@ -3,40 +3,40 @@ pub mod solver;
 pub mod user;
 
 use anyhow::Result;
-use async_trait::async_trait;
 use std::any::type_name;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::Semaphore;
-#[async_trait]
 pub trait Client: Send + Sync {
     type Req: Debug + Send + wincode::SchemaWrite<Src = Self::Req>;
     type Recv: Debug + Send + for<'de> wincode::SchemaRead<'de, Dst = Self::Recv>;
 
-    async fn req(&self, request: Self::Req) -> Result<Self::Recv> {
-        let mut stream = TcpStream::connect(&self.get_addr()).await?;
+    fn req(&self, request: Self::Req) -> impl Future<Output = Result<Self::Recv>> {
+        async move {
+            let mut stream = TcpStream::connect(&self.get_addr()).await?;
 
-        let req_bytes = wincode::serialize(&request)?;
-        let len = (req_bytes.len() as u64).to_be_bytes();
+            let req_bytes = wincode::serialize(&request)?;
+            let len = (req_bytes.len() as u64).to_be_bytes();
 
-        stream.write_all(&len).await?;
-        stream.write_all(&req_bytes).await?;
+            stream.write_all(&len).await?;
+            stream.write_all(&req_bytes).await?;
 
-        let mut len_buf = [0u8; 8];
-        stream.read_exact(&mut len_buf).await?;
+            let mut len_buf = [0u8; 8];
+            stream.read_exact(&mut len_buf).await?;
 
-        let resp_len = u64::from_be_bytes(len_buf);
+            let resp_len = u64::from_be_bytes(len_buf);
 
-        let mut resp_buf = vec![0u8; resp_len as usize];
-        stream.read_exact(&mut resp_buf).await?;
+            let mut resp_buf = vec![0u8; resp_len as usize];
+            stream.read_exact(&mut resp_buf).await?;
 
-        let resp: Self::Recv = wincode::deserialize(&resp_buf)?;
+            let resp: Self::Recv = wincode::deserialize(&resp_buf)?;
 
-        log::info!("Received valid response: {:?}", resp);
+            log::info!("{}\nReceived valid response", type_name::<Self>());
 
-        Ok(resp)
+            Ok(resp)
+        }
     }
 
     fn get_addr(&self) -> &str;
@@ -45,7 +45,7 @@ pub trait Client: Send + Sync {
 pub trait Listener: Send + Sync {
     type Recv: Debug + Send + for<'de> wincode::SchemaRead<'de, Dst = Self::Recv>;
 
-    fn listen<F, Fut>(&self, on_read: F) -> impl Future<Output = anyhow::Result<()>>
+    fn listen<F, Fut>(&self, on_read: F) -> impl Future<Output = Result<()>>
     where
         F: Fn(Self::Recv, TcpStream) -> Fut + Clone + Send + Sync + 'static,
         Fut: Future<Output = ()> + Send + 'static,

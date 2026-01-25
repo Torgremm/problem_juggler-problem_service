@@ -32,6 +32,11 @@ impl StressRunner {
     }
 }
 
+const PROBLEMS: [ProblemRequest; 3] = [
+    ProblemRequest::LargestWindowInArray,
+    ProblemRequest::CountIslands,
+    ProblemRequest::SizeOfIsland,
+];
 impl StressRunner {
     pub async fn run(&self) -> Result<(), ServiceError> {
         let problem_client = RemoteProblemClient::default();
@@ -45,8 +50,9 @@ impl StressRunner {
                 name: format!("user{}", n),
                 hash: hasher.finish().to_string(),
             });
+            let problem_type = PROBLEMS[n % 3];
 
-            let problem_req = ProblemServiceRequest::Problem(ProblemRequest::LargestWindowInArray);
+            let problem_req = ProblemServiceRequest::Problem(problem_type);
             let _ = user_client
                 .req(user_req)
                 .await
@@ -67,12 +73,7 @@ impl StressRunner {
                     ));
                 }
             };
-            let sol = validate(
-                resp.data,
-                ProblemRequest::LargestWindowInArray,
-                &solver_client,
-            )
-            .await?;
+            let sol = validate(resp.data, problem_type, &solver_client).await?;
 
             let validation_req = ProblemServiceRequest::Validation(ValidationRequest {
                 problem_id: resp.id,
