@@ -36,7 +36,7 @@ async fn main() -> Result<(), ServiceError> {
     .await?;
     let problem_service = start_and_wait_service(
         &problem_service_dir,
-        &contracts::solver::url(),
+        &contracts::problem::url(),
         Duration::from_secs(10),
     )
     .await?;
