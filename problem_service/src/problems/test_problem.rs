@@ -25,7 +25,7 @@ mod tests {
 
     #[test]
     fn ensure_size_is_valid() {
-        let data = SizeOfIsland::create();
+        let data = TestProblem::create();
 
         assert!((10..=20).contains(&data.len()))
     }
