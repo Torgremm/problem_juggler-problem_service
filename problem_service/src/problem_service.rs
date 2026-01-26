@@ -6,6 +6,7 @@ use crate::problems::largest_window::LargestWindow;
 use crate::problems::problem_kind::DBColumn;
 use crate::problems::problem_kind::Problem;
 use crate::problems::size_of_island::SizeOfIsland;
+use crate::problems::test_problem::TestProblem;
 use anyhow::Result;
 use contracts::Client;
 use contracts::problem::ProblemRequest;
@@ -38,8 +39,10 @@ impl ProblemService {
     pub async fn get_dispatch(&self, req: ProblemRequest) -> Result<ProblemRow> {
         match req {
             ProblemRequest::LargestWindowInArray => Ok(self.get::<LargestWindow>().await?),
-            ProblemRequest::UnimplementedProblem => todo!(),
-            ProblemRequest::TestProblem => todo!(),
+            ProblemRequest::UnimplementedProblem => {
+                Err(anyhow::anyhow!("Requested a problem that does not exist!"))
+            }
+            ProblemRequest::TestProblem => Ok(self.get::<TestProblem>().await?),
             ProblemRequest::SizeOfIsland => Ok(self.get::<SizeOfIsland>().await?),
             ProblemRequest::CountIslands => Ok(self.get::<CountIslands>().await?),
         }
